@@ -1,0 +1,65 @@
+spring:
+  main:
+    web-application-type: servlet
+  application:
+    name: SpringProject
+  datasource:
+    url: jdbc:postgresql://ep-flat-paper-a5paiyg9.us-east-2.aws.neon.tech/neondb?user=neondb_owner&password=Wq8XjftbQ7UR&sslmode=require
+    username: fatimata
+    password: passer123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+  devtools:
+    restart:
+      enabled: true   # Active ou désactive le redémarrage automatique
+    livereload:
+      enabled: true   # Active ou désactive le live reload
+
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+    org.springframework.web: DEBUG
+server:
+  port: 3000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    oauth2RedirectUrl: /swagger-ui/oauth2-redirect.html
+    display-request-duration: true
+  show-actuator: true
+
+  security-schemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearer-format: JWT
+
+
+# application.yml
+security:
+  jwt:
+    secret-key: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b
+    expiration-time: 3600000
+
+
+
+
+
+
