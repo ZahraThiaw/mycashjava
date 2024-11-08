@@ -16,10 +16,8 @@ import sn.odc.flutter.Web.Dtos.response.LoginResponse;
 @RequestMapping("/auth")
 @RestController
 @Tag(name = "Auth ", description = "API pour gérer les users")
-
 public class AuthenticationController {
     private final JwtService jwtService;
-
     private final AuthenticationService authenticationService;
 
     public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
@@ -28,21 +26,17 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterDTO registerUserDto) {
-        User registeredCompte = authenticationService.signup(registerUserDto);
-
-        return ResponseEntity.ok(registeredCompte);
+    public ResponseEntity<User> register(@RequestBody RegisterDTO registerDTO) {
+        User registeredUser = authenticationService.signup(registerDTO);
+        return ResponseEntity.ok(registeredUser);
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
-
         String jwtToken = jwtService.generateToken(authenticatedUser);
-
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(jwtToken);
-
         return ResponseEntity.ok(loginResponse);
     }
 }

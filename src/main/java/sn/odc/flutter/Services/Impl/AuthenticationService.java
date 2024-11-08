@@ -27,30 +27,32 @@ public class AuthenticationService {
     }
 
     public User signup(RegisterDTO input) {
-        // Vérifier si le telephone existe déjà
+        // Vérifier si le téléphone existe déjà
         if (userRepository.findCompteByTelephone(input.getTelephone()).isPresent()) {
-            throw new RuntimeException("Telephone already exists");
+            throw new RuntimeException("Téléphone déjà existant");
         }
 
-        User compte = new User();
-        compte.setEmail(input.getEmail());
-        compte.setTelephone(input.getTelephone());
-        compte.setPassword(passwordEncoder.encode(input.getPassword()));
-        compte.setNom(input.getNom());
-        compte.setPrenom(input.getPrenom());
+        User user = new User();
+        user.setEmail(input.getEmail());
+        user.setTelephone(input.getTelephone());
+        user.setPassword(passwordEncoder.encode(input.getPassword()));
+        user.setNom(input.getNom());
+        user.setPrenom(input.getPrenom());
+        user.setType(input.getType());
+        user.setStatut(input.getStatut());
 
-        return userRepository.save(compte);
+        return userRepository.save(user);
     }
 
     public User authenticate(LoginUserDto input) {
         try {
             // Vérifier si le numéro de téléphone existe
             User user = userRepository.findCompteByTelephone(input.getTelephone())
-                    .orElseThrow(() -> new BadCredentialsException("Invalid telephone or Password"));
+                    .orElseThrow(() -> new BadCredentialsException("Téléphone ou mot de passe invalide"));
 
             // Vérifier si le mot de passe correspond
             if (!passwordEncoder.matches(input.getPassword(), user.getPassword())) {
-                throw new BadCredentialsException("Invalid password or telephone");
+                throw new BadCredentialsException("Téléphone ou mot de passe invalide");
             }
 
             // Authentifier (vérifiez que AuthenticationManager est configuré pour utiliser le téléphone)
@@ -63,8 +65,7 @@ public class AuthenticationService {
 
             return user;
         } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("Authentication failed: " + e.getMessage());
+            throw new BadCredentialsException("Échec d'authentification : " + e.getMessage());
         }
     }
-
 }

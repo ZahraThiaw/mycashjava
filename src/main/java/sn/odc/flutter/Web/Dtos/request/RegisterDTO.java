@@ -11,12 +11,11 @@ import sn.odc.flutter.Datas.Entity.User;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterDTO {
-    private Long id;
-    private User.TypeCompte type = User.TypeCompte.CLIENT;
     private String nom;
     private String prenom;
     private String telephone;
     private String email;
     private String password;
+    private User.TypeCompte type = User.TypeCompte.CLIENT;
     private User.Statut statut = User.Statut.ACTIF;
 }
