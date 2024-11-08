@@ -64,19 +64,10 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Configuration des origines autorisées
-        // Autoriser le front-end (modifiez si nécessaire)
-        configuration.setAllowedOrigins(List.of("*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Méthodes autorisées
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Autoriser les headers
-        configuration.setExposedHeaders(List.of("Authorization")); // Si vous avez besoin d'exposer certains headers comme Authorization
-
-        // Configuration des méthodes HTTP autorisées
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
         ));
-
-        // Configuration des en-têtes autorisés
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
@@ -86,24 +77,17 @@ public class SecurityConfiguration {
                 "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"
         ));
-
-        // Exposition des en-têtes
         configuration.setExposedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Disposition"
         ));
-
-        // Permet l'envoi des cookies (si nécessaire)
-        configuration.setAllowCredentials(true);
-
-        // Durée de mise en cache des résultats du pre-flight
+        configuration.setAllowCredentials(false); // Changé à false si vous utilisez "*"
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 
 
 }
