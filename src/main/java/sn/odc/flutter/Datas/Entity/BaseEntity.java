@@ -29,4 +29,5 @@ public abstract class BaseEntity implements SoftDeletable {
     @Setter
     @Getter
     private boolean deleted = false;
+
 }

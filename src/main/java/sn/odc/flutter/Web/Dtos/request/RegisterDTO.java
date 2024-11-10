@@ -16,6 +16,4 @@ public class RegisterDTO {
     private String telephone;
     private String email;
     private String password;
-    private User.TypeCompte type = User.TypeCompte.CLIENT;
-    private User.Statut statut = User.Statut.ACTIF;
 }

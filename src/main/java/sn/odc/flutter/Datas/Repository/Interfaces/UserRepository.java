@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface UserRepository extends BaseInterface<User,Long> {
    Optional<User> findCompteByTelephone(String telephone);
    Optional<User> findCompteByEmail(String email);
+   Optional<User> findByTelephoneAndDeletedFalse(String telephone);
 }

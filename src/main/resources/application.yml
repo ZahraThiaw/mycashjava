@@ -4,7 +4,7 @@ spring:
   application:
     name: SpringProject
   datasource:
-    url: jdbc:postgresql://ep-flat-paper-a5paiyg9.us-east-2.aws.neon.tech/neondb?user=neondb_owner&password=Wq8XjftbQ7UR&sslmode=require
+    url: jdbc:postgresql://ep-damp-morning-a5le2z56.us-east-2.aws.neon.tech/neondb?user=neondb_owner&password=c8bgjYeLQEq5&sslmode=require
     username: fatimata
     password: passer123
     driver-class-name: org.postgresql.Driver
@@ -58,7 +58,18 @@ security:
     secret-key: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b
     expiration-time: 3600000
 
-
+smtp:
+  host: smtp.gmail.com
+  port: 587
+  username: fatimatathiaw6@gmail.com
+  password: jjxvpvueocabebko
+  properties:
+    mail:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+          required: true
 
 
 

@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
@@ -81,7 +82,8 @@ public class User extends BaseEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    private int solde = 0;
+    @Column(precision = 10, scale = 2)
+    private BigDecimal solde = BigDecimal.ZERO;
 
     private String qrcode;
 
@@ -89,5 +91,4 @@ public class User extends BaseEntity implements UserDetails {
     private Statut statut = Statut.ACTIF;
 
     private int plafonnd = 500000;
-
 }
