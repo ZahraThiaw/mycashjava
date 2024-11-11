@@ -48,6 +48,31 @@ public class Transaction extends BaseEntity {
     @JoinColumn(name = "distibuteur")
     private User distributeurUser;
 
+    public enum SchedulePeriod {
+        NONE,    // Pour les transferts normaux
+        DAILY,
+        WEEKLY,
+        MONTHLY
+    }
+
+    private Long parentTransactionId;  // Pour lier les transferts planifiés à leur transaction parent
+
+    // Méthode utilitaire pour vérifier si c'est un transfert planifié
+    public boolean isScheduledTransfer() {
+        return schedulePeriod != SchedulePeriod.NONE;
+    }
+
+    @Column(name = "is_schedule_active")
+    private boolean isScheduleActive = false;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "next_execution_date")
+    private Date nextExecutionDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "schedule_period")
+    private SchedulePeriod schedulePeriod = SchedulePeriod.NONE;
+
 
 }
 

@@ -71,8 +71,8 @@ public class AuthenticationService {
             logger.info("Sauvegarde du QR code: {}", qrCodePath);
             ImageIO.write(qrCode, "PNG", qrCodeFile);
 
-            String logoPath = baseDir + "/logos/logo.svg";
-            try {
+            String logoPath = baseDir + "/logos/logo.png";
+
                 BufferedImage cardImage = CardGenerator.generateCard(qrCode, logoPath);
                 if (cardImage == null) {
                     throw new RuntimeException("Échec de la génération de la carte");
@@ -93,10 +93,6 @@ public class AuthenticationService {
                         cardFile
                 );
 
-            } catch (TranscoderException e) {
-                logger.error("Erreur lors de la conversion du logo SVG", e);
-                throw new RuntimeException("Erreur lors de la conversion du logo SVG", e);
-            }
 
             logger.info("Inscription terminée avec succès");
             return user;
