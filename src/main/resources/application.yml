@@ -51,7 +51,6 @@ springdoc:
       scheme: bearer
       bearer-format: JWT
 
-
 # application.yml
 security:
   jwt:

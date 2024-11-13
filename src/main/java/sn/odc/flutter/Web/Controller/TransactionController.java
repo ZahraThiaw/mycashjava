@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import sn.odc.flutter.Datas.Entity.Transaction;
 import sn.odc.flutter.Web.Dtos.request.MultiTransferRequestDTO;
-import sn.odc.flutter.Web.Dtos.request.ScheduleTransferRequestDTO;
+import sn.odc.flutter.Web.Dtos.request.ScheduledTransferRequestDTO;
 import sn.odc.flutter.Web.Dtos.request.TransferRequestDTO;
 import sn.odc.flutter.Web.Dtos.response.GenericResponse;
 import sn.odc.flutter.Web.Dtos.response.TransactionResponseDTO;
@@ -30,17 +30,5 @@ public interface TransactionController extends BaseController<Transaction, Trans
     ResponseEntity<GenericResponse<List<TransactionResponseDTO>>> getAllTransactions();
 
     ResponseEntity<GenericResponse<List<TransactionResponseDTO>>> getTransactionsForUser(Authentication authentication);
-
-    ResponseEntity<GenericResponse<TransactionResponseDTO>> planifierTransfert(
-            Authentication authentication,
-            ScheduleTransferRequestDTO request
-    );
-
-    ResponseEntity<GenericResponse<Boolean>> annulerPlanification(
-            Authentication authentication,
-            Long transactionId
-    );
-
-    ResponseEntity<GenericResponse<List<TransactionResponseDTO>>> getScheduledTransfers(Authentication authentication);
 
 }

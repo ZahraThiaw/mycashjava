@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import sn.odc.flutter.Datas.Entity.User;
 
+import java.math.BigDecimal;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
@@ -76,6 +78,33 @@ public class JwtService {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+    // Récupérer les informations de l'utilisateur à partir du token
+    public User getUserFromToken(String token) {
+        Claims claims = extractAllClaims(token);
+        String telephone = claims.get("telephone", String.class);
+        String nom = claims.get("nom", String.class);
+        String prenom = claims.get("prenom", String.class);
+        String email = claims.get("email", String.class);
+        User.TypeCompte type = User.TypeCompte.valueOf(claims.get("type", String.class));
+        BigDecimal solde = (BigDecimal) claims.get("solde", BigDecimal.class);
+        String qrcode = claims.get("qrcode", String.class);
+        User.Statut statut = User.Statut.valueOf(claims.get("statut", String.class));
+        Integer plafond = (Integer) claims.get("plafond", Integer.class);
+
+        User user = new User();
+        user.setTelephone(telephone);
+        user.setNom(nom);
+        user.setPrenom(prenom);
+        user.setEmail(email);
+        user.setType(type);
+        user.setSolde(solde);
+        user.setQrcode(qrcode);
+        user.setStatut(statut);
+        user.setPlafonnd(plafond);
+
+        return user;
+    }
+
 
     // Valider le token en vérifiant si l'utilisateur correspond et si le token n'est pas expiré
     public boolean isTokenValid(String token, UserDetails userDetails) {

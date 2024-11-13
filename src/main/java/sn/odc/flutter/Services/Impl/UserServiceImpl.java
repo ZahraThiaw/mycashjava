@@ -4,22 +4,23 @@ import org.springframework.stereotype.Service;
 import sn.odc.flutter.Datas.Entity.User;
 import sn.odc.flutter.Datas.Repository.Interfaces.UserRepository;
 import sn.odc.flutter.Services.UserService;
-import sn.odc.flutter.Web.Dtos.request.RegisterDTO;
+
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl extends BaseServiceImpl<User, Long> implements UserService {
-    private final UserRepository compteRepository;
 
-    public UserServiceImpl(UserRepository compteRepository) {
-        super(compteRepository);
-        this.compteRepository = compteRepository;
+    private final UserRepository userRepository;
+    private final JwtService jwtService;
+
+    public UserServiceImpl(UserRepository userRepository, JwtService jwtService) {
+        super(userRepository);
+        this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     @Override
-    public User createCompte(RegisterDTO dto) {
-        User compte = new User();
-
-
-        return compteRepository.save(compte);
+    public Optional <User> getUserProfile(String telephone ) {
+        return userRepository.findByTelephoneAndDeletedFalse(telephone);
     }
 }

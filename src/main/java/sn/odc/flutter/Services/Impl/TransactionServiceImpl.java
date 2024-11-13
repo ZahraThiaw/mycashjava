@@ -7,7 +7,7 @@ import sn.odc.flutter.Datas.Entity.Transaction;
 import sn.odc.flutter.Datas.Entity.User;
 import sn.odc.flutter.Datas.Repository.Interfaces.TransactionRepository;
 import sn.odc.flutter.Datas.Repository.Interfaces.UserRepository;
-import sn.odc.flutter.Web.Dtos.request.ScheduleTransferRequestDTO;
+import sn.odc.flutter.Web.Dtos.request.ScheduledTransferRequestDTO;
 import sn.odc.flutter.Web.Dtos.request.TransferRequestDTO;
 import sn.odc.flutter.Web.Dtos.request.MultiTransferRequestDTO;
 import sn.odc.flutter.Web.Dtos.response.TransactionResponseDTO;
@@ -201,127 +201,5 @@ public class TransactionServiceImpl extends BaseServiceImpl<Transaction, Long> i
         dto.setSolde(user.getSolde());
         dto.setRole(user.getType().name());
         return dto;
-    }
-
-
-    @Override
-    @Transactional
-    public TransactionResponseDTO planifierTransfert(Long expediteurId, ScheduleTransferRequestDTO request) {
-        User expediteur = userRepository.findByIdAndDeletedFalse(expediteurId)
-                .orElseThrow(() -> new RuntimeException("Expéditeur non trouvé"));
-
-        User destinataire = userRepository.findByTelephoneAndDeletedFalse(request.getDestinataire())
-                .orElseThrow(() -> new RuntimeException("Destinataire non trouvé"));
-
-        // Créer la transaction planifiée
-        Transaction planification = new Transaction();
-        planification.setMontant(request.getMontant());
-        planification.setFrais(calculerFrais(request.getMontant()));
-        planification.setMontantTotal(calculerMontantTotal(request.getMontant()));
-        planification.setType(Transaction.TypeTransaction.TRANSFERT);
-        planification.setDate(new Date());
-        planification.setExpUser(expediteur);
-        planification.setDestinataireUser(destinataire);
-
-        // Paramètres de planification
-        planification.setSchedulePeriod(request.getPeriod());
-        planification.setNextExecutionDate(calculateNextExecutionDate(new Date(), request.getPeriod()));
-        planification.setScheduleActive(true);
-
-        Transaction savedPlanification = transactionRepository.save(planification);
-        return convertToDTO(savedPlanification);
-    }
-
-    @Transactional
-    protected void executeScheduledTransfer(Transaction planification) {
-        try {
-            // Créer une requête de transfert basée sur la planification
-            TransferRequestDTO request = new TransferRequestDTO();
-            request.setDestinataire(planification.getDestinataireUser().getTelephone());
-            request.setMontant(planification.getMontant());
-
-            // Effectuer le transfert
-            TransactionResponseDTO executed = effectuerTransfert(
-                    planification.getExpUser().getId(),
-                    request
-            );
-
-            // Mettre à jour la date de prochaine exécution de la planification
-            planification.setNextExecutionDate(
-                    calculateNextExecutionDate(new Date(), planification.getSchedulePeriod())
-            );
-            transactionRepository.save(planification);
-        } catch (Exception e) {
-            // Log l'erreur
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    @Scheduled(fixedRate = 60000) // Vérifie toutes les minutes
-    @Transactional
-    public void executeScheduledTransfers() {
-        Date now = new Date();
-        List<Transaction> scheduledTransfers = transactionRepository
-                .findByScheduleActiveTrueAndNextExecutionDateBefore(now);
-
-        for (Transaction planification : scheduledTransfers) {
-            try {
-                executeScheduledTransfer(planification);
-            } catch (Exception e) {
-                // Log l'erreur mais continue avec les autres transferts
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<TransactionResponseDTO> getScheduledTransfers(Long userId) {
-        List<Transaction> scheduledTransfers = transactionRepository
-                .findByExpUser_IdAndScheduleActiveTrueOrderByDateDesc(userId);
-        return scheduledTransfers.stream()
-                .map(this::convertToDTO)
-                .toList();
-    }
-
-    @Override
-    @Transactional
-    public boolean annulerPlanification(Long transactionId, Long userId) {
-        Transaction planification = transactionRepository.findByIdAndDeletedFalse(transactionId)
-                .orElseThrow(() -> new RuntimeException("Planification non trouvée"));
-
-        if (!planification.getExpUser().getId().equals(userId)) {
-            throw new RuntimeException("Vous n'êtes pas autorisé à annuler cette planification");
-        }
-
-        if (!planification.isScheduledTransfer() || !planification.isScheduleActive()) {
-            throw new RuntimeException("Cette transaction n'est pas une planification active");
-        }
-
-        planification.setScheduleActive(false);
-        transactionRepository.save(planification);
-        return true;
-    }
-
-    private Date calculateNextExecutionDate(Date fromDate, Transaction.SchedulePeriod period) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(fromDate);
-
-        switch (period) {
-            case DAILY:
-                calendar.add(Calendar.DAY_OF_MONTH, 1);
-                break;
-            case WEEKLY:
-                calendar.add(Calendar.WEEK_OF_YEAR, 1);
-                break;
-            case MONTHLY:
-                calendar.add(Calendar.MONTH, 1);
-                break;
-            default:
-                return null;
-        }
-
-        return calendar.getTime();
     }
 }
