@@ -11,11 +11,15 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sn.odc.flutter.Datas.Entity.User;
+import sn.odc.flutter.Services.TransactionService;
 import sn.odc.flutter.Services.UserService;
 import sn.odc.flutter.Web.Controller.UserController;
 import sn.odc.flutter.Web.Dtos.response.GenericResponse;
+import sn.odc.flutter.Web.Dtos.response.TransactionResponseDTO;
+import sn.odc.flutter.Web.Dtos.response.UserProfileDTO;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 @RequestMapping("/users")
@@ -23,12 +27,15 @@ import java.util.Optional;
 public class UserControllerImpl extends BaseControllerImpl<User, User> implements UserController {
 
     private final UserService userService;
+    private final TransactionService transactionService;
+
     @Autowired
     private HttpServletRequest request;
 
-    public UserControllerImpl(UserService userService) {
+    public UserControllerImpl(UserService userService, TransactionService transactionService) {
         super(userService);
         this.userService = userService;
+        this.transactionService = transactionService;
     }
 
     @Override
@@ -38,48 +45,50 @@ public class UserControllerImpl extends BaseControllerImpl<User, User> implement
 
     @GetMapping("/profile")
     @Override
-    public ResponseEntity<GenericResponse<User>> getUserProfile() {
+    public ResponseEntity<GenericResponse<UserProfileDTO>> getUserProfile() {
         String authHeader = request.getHeader("Authorization");
         System.out.println("getProfile" + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.ok(new GenericResponse(null, "Token non fourni"));
+            return ResponseEntity.ok(new GenericResponse<>(null, "Token non fourni"));
         }
 
-        // Extraire le token sans le prefix "Bearer "
-        String token = authHeader.substring(7);
-        System.out.println("Token: " + token);
-
         try {
-            // 2. Extraire et décoder le token
-            String token2 = authHeader.substring(7);
+            // Extraire le token sans le prefix "Bearer "
+            String token = authHeader.substring(7);
             String[] chunks = token.split("\\.");
 
-            // 3. Decoder le payload (deuxième partie du token)
+            // Decoder le payload
             Base64.Decoder decoder = Base64.getUrlDecoder();
             String payload = new String(decoder.decode(chunks[1]));
 
-            // 4. Parser le JSON du payload
+            // Parser le JSON du payload
             ObjectMapper mapper = new ObjectMapper();
             JsonNode claims = mapper.readTree(payload);
 
-            // 5. Extraire les informations
-            String username = claims.get("sub").asText();  // sub est le claim standard pour username
+            String username = claims.get("sub").asText();
             System.out.println("username : " + username);
 
-            Optional<User> compte = userService.getUserProfile(username);
-            if (compte == null) {
+            Optional<User> userOptional = userService.getUserProfile(username);
+            if (userOptional.isEmpty()) {
                 return ResponseEntity
                         .status(HttpStatus.UNAUTHORIZED)
-                        .body(new GenericResponse(null, "Compte non trouvé"));
+                        .body(new GenericResponse<>(null, "Compte non trouvé"));
             }
 
-            return ResponseEntity.ok(new GenericResponse( compte,  "Profil recupere avec succes"));
+            User user = userOptional.get();
+            // Récupérer les transactions de l'utilisateur
+            List<TransactionResponseDTO> transactions = transactionService.getTransactionsByUser(user.getId());
+
+            // Créer l'objet de réponse combiné
+            UserProfileDTO profileDTO = new UserProfileDTO(user, transactions);
+
+            return ResponseEntity.ok(new GenericResponse<>(profileDTO, "Profil récupéré avec succès"));
 
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body(new GenericResponse(null, "Token expiré"));
+                    .body(new GenericResponse<>(null, "Token expiré"));
         }
     }
 }
